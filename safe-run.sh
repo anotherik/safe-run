@@ -14,9 +14,14 @@
 
 echo "=== OSV Universal Proactive Guard ==="
 
-if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    cat <<'EOF'
-Usage: safe-run.sh [command...]
+TARGET_DIR=""
+ARGS=()
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            cat <<'EOF'
+Usage: safe-run.sh [--path DIR] [command...]
 
 Scans project lockfiles with osv-scanner and blocks execution if malware
 or critical vulnerabilities are found. If a command is provided, it runs
@@ -24,13 +29,45 @@ only after the scan passes.
 
 Options:
   -h, --help  Show this help message
+  --path DIR  Scan the specified project directory
 
 Examples:
   ./safe-run.sh                 # scan only
   ./safe-run.sh npm start        # scan then run
   ./safe-run.sh ./app --flag     # scan then run
+  ./safe-run.sh --path ../repo   # scan a different directory
 EOF
-    exit 0
+            exit 0
+            ;;
+        --path)
+            shift
+            if [ -z "$1" ]; then
+                echo "❌ --path requires a directory."
+                exit 1
+            fi
+            TARGET_DIR="$1"
+            shift
+            ;;
+        --)
+            shift
+            ARGS+=("$@")
+            break
+            ;;
+        *)
+            ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+set -- "${ARGS[@]}"
+
+if [ -n "$TARGET_DIR" ]; then
+    if [ ! -d "$TARGET_DIR" ]; then
+        echo "❌ --path directory not found: $TARGET_DIR"
+        exit 1
+    fi
+    cd "$TARGET_DIR" || exit 1
 fi
 
 # Common lockfiles across all major ecosystems
