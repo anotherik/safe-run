@@ -41,10 +41,10 @@ brew install jq
 sudo apt-get install -y jq
 ```
 
-Install Python `cvss`:
+Install Python `cvss` (inside the local venv created by the install script):
 
 ```bash
-python3 -m pip install cvss
+./install-deps.sh
 ```
 
 ## Supported lockfiles (language → package manager):
@@ -72,6 +72,7 @@ Examples:
 ./safe-run.sh npm start        # scan then run
 ./safe-run.sh ./app --flag     # scan then run
 ./safe-run.sh --help           # show help
+./safe-run.sh --path ../repo   # scan a different directory
 ```
 
 ## Safe workflow
@@ -80,6 +81,7 @@ To reduce exposure to malicious post/pre‑install scripts:
 
 - Prefer a locked dependency graph in version control.
 - You can **scan without installing** by running the script with no command.
+- Run the script from the project root, or pass `--path`.
 - When you do install, disable lifecycle scripts, then scan, then run.
 
 Scan-only (no install):
@@ -103,6 +105,14 @@ python3 -m pip install -r requirements.txt --no-deps
 ```
 
 This keeps the **first execution gated** by malware and vulnerability checks and limits script-based supply-chain risk.
+
+## Install dependencies
+
+You can install the required dependencies with:
+
+```bash
+./install-deps.sh
+```
 
 ## Exit behavior
 
